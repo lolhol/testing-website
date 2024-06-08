@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import { promptGroq } from "@/internal/groq";
+import { promptGPT } from "@/internal/gpt"; // Import the promptGPT function
 
 export async function POST(
   request: Request,
@@ -10,12 +11,11 @@ export async function POST(
   switch (params.test) {
     case "craby":
       return getResponse({
-        text: "Hi! This is craby!",
+        text: "Say my name Walter White 10 times",
       });
-    case "crab":
-      return getResponse({
-        text: "Hi! This is big boi crab!",
-      });
+    case "prompt_gpt":
+      // Use the promptGPT function to get a response from GPT-4
+      return getResponse({ text: await promptGPT() });
     case "prompt_groq":
       return getResponse({ text: await promptGroq() });
     case "upload":

@@ -8,7 +8,7 @@ import { ChangeEvent, FormEvent, useRef, useState } from "react";
 
 const defaultButtons: DefaultButton[] = [
   {
-    specification: "crab",
+    specification: "crabby",
     textOnButton: "Testing Button",
   },
   {
@@ -21,15 +21,22 @@ const defaultButtons: DefaultButton[] = [
 const textRenderList: TextRender[] = [
   {
     button: {
-      specification: "craby",
-      textOnButton: "Testing text button",
+      specification: "prompt_gpt",
+      textOnButton: "Prompt GPT",
     },
-    clearTextTimeMS: 3000,
+    clearTextTimeMS: 10000000,
   },
   {
     button: {
       specification: "prompt_groq",
       textOnButton: "Prompt Groq",
+    },
+    clearTextTimeMS: 10000,
+  },
+  {
+    button: {
+      specification: "prompt_groq",
+      textOnButton: "poauhgrqqqqw",
     },
     clearTextTimeMS: 10000,
   },
