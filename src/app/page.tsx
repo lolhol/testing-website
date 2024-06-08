@@ -15,10 +15,6 @@ const defaultButtons: DefaultButton[] = [
     specification: "crab111",
     textOnButton: "Testing Button1",
   },
-  {
-    specification: "crab",
-    textOnButton: "Testing Button",
-  },
 ];
 
 // MAKE SURE TO PUT THE ACTUAL TEXT U WANT TO RENDER IN .text PROPERTY OF THE RESPONSE
@@ -32,14 +28,12 @@ const textRenderList: TextRender[] = [
   },
   {
     button: {
-      specification: "craby1",
-      textOnButton: "Testing text button",
+      specification: "prompt_groq",
+      textOnButton: "Prompt Groq",
     },
-    clearTextTimeMS: 3000,
+    clearTextTimeMS: 10000,
   },
 ];
-
-const imageUploadList: string[] = [];
 
 /*
 ?

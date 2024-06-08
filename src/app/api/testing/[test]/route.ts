@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { promptGroq } from "@/internal/groq";
 
-export function POST(
+export async function POST(
   request: Request,
   { params }: { params: { test: string } }
 ) {
@@ -15,7 +16,10 @@ export function POST(
       return getResponse({
         text: "Hi! This is big boi crab!",
       });
+    case "prompt_groq":
+      return getResponse({ text: await promptGroq() });
     case "upload":
+      // the file will appear in /public/uploads
       return handleFileUpload(request);
   }
   return new Response("Hello, Next.js!");
