@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import { promptGroq } from "@/internal/groq";
-import { promptGPT } from "@/internal/gpt"; // Import the promptGPT function
+import { prompGPTWithImages, promptGPT } from "@/internal/gpt"; // Import the promptGPT function
 
 export async function POST(
   request: Request,
@@ -15,7 +15,7 @@ export async function POST(
       });
     case "prompt_gpt":
       // Use the promptGPT function to get a response from GPT-4
-      return getResponse({ text: await promptGPT() });
+      return getResponse({ text: await prompGPTWithImages() });
     case "prompt_groq":
       return getResponse({ text: await promptGroq() });
     case "upload":
