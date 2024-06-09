@@ -15,7 +15,7 @@ export async function POST(
       });
     case "prompt_gpt":
       // Use the promptGPT function to get a response from GPT-4
-      return getResponse({ text: await prompGPTWithImages() });
+      return getResponse({ text: await promptGPT() });
     case "prompt_groq":
       return getResponse({ text: await promptGroq() });
     case "upload":

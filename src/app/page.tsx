@@ -2,10 +2,6 @@
 
 import { ChangeEvent, FormEvent, useRef, useState } from "react";
 
-/*
-?
-*/
-
 const defaultButtons: DefaultButton[] = [
   {
     specification: "crabby",
@@ -17,7 +13,6 @@ const defaultButtons: DefaultButton[] = [
   },
 ];
 
-// MAKE SURE TO PUT THE ACTUAL TEXT U WANT TO RENDER IN .text PROPERTY OF THE RESPONSE
 const textRenderList: TextRender[] = [
   {
     button: {
@@ -42,10 +37,6 @@ const textRenderList: TextRender[] = [
   },
 ];
 
-/*
-?
-*/
-
 interface DefaultButton {
   specification: string;
   textOnButton: string;
@@ -56,83 +47,51 @@ interface TextRender {
   clearTextTimeMS: number;
 }
 
-interface ImageUploader {
-  button: DefaultButton;
-  clearTextTimeMS: number;
-}
-
 export default function Home() {
-  function generateListWithBooleans(
-    buttons: DefaultButton[]
-  ): Map<string, boolean> {
-    const returnList: Map<string, boolean> = new Map();
-    buttons.forEach((button) => {
-      returnList.set(button.textOnButton, false);
-    });
-
-    for (const text of textRenderList) {
-      returnList.set(text.button.textOnButton, false);
-    }
-
-    return returnList;
-  }
-
-  function generateListWithStrings(
-    buttons: DefaultButton[]
-  ): Map<string, string> {
-    const returnList: Map<string, string> = new Map();
-
-    for (const text of textRenderList) {
-      returnList.set(text.button.textOnButton, "Nothing here yet");
-    }
-
-    return returnList;
-  }
-
-  const [clicked, setClicked] = useState<Map<string, boolean>>(
-    generateListWithBooleans(defaultButtons)
-  );
-
-  const [texts, setText] = useState<Map<string, string>>(
-    generateListWithStrings(defaultButtons)
-  );
-
+  const [clicked, setClicked] = useState<Map<string, boolean>>(new Map());
+  const [texts, setText] = useState<Map<string, string>>(new Map());
   const [clickedImageUpload, setClickedImageUpload] = useState<boolean>(false);
-
-  function addToListWithBooleans(button: DefaultButton) {
-    const resetClicked = new Map(clicked);
-    resetClicked.set(button.textOnButton, false);
-    setClicked(resetClicked);
-  }
-
-  async function handleClickBaseButton(link: string) {
-    const res = await fetch("/api/testing/" + link, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: "John Doe" }),
-    });
-    const jsonRes = await res.json();
-    console.log(jsonRes);
-  }
-
-  async function handleClickBaseText(link: string): Promise<string> {
-    const res = await fetch("/api/testing/" + link, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: "John Doe" }),
-    });
-
-    const jsonRes = await res.json();
-    const text: string = jsonRes.text;
-    return text;
-  }
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function isValidFormat(output: string): boolean {
+    const formatRegex = /Q1:'.+?',Q2:'.+?',Q3:'.+?',Q4:'.+?',Q5:'.+?'/;
+    return formatRegex.test(output);
+  }
+
+  async function handleClickBaseText(buttonSpecification: string, iterations: number): Promise<void> {
+    let correctFormatCount = 0;
+
+    for (let i = 0; i < iterations; i++) {
+      const res = await fetch("/api/testing/" + buttonSpecification, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: "John Doe" }),
+      });
+
+      const jsonRes = await res.json();
+      const text: string = jsonRes.text;
+
+      if (isValidFormat(text)) {
+        correctFormatCount++;
+      }
+
+      const newTexts = new Map(texts);
+      newTexts.set(buttonSpecification, text);
+      setText(newTexts);
+
+      setTimeout(() => {
+        const updatedTexts = new Map(texts);
+        updatedTexts.set(buttonSpecification, "");
+        setText(updatedTexts);
+      }, textRenderList.find(tr => tr.button.specification === buttonSpecification)?.clearTextTimeMS || 10000);
+    }
+
+    console.log(`Correct format count: ${correctFormatCount} out of ${iterations}`);
+  }
+
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     if (event.target.files) {
       setSelectedFile(event.target.files[0]);
@@ -163,8 +122,14 @@ export default function Home() {
           <button
             key={index}
             className="w-40 h-20 border-2 border-black rounded-lg mx-5 my-5"
-            onClick={() => {
-              handleClickBaseButton(defaultButton.specification);
+            onClick={async () => {
+              await fetch("/api/testing/" + defaultButton.specification, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name: "John Doe" }),
+              });
               const newClicked = new Map(clicked);
               newClicked.set(defaultButton.textOnButton, true);
               setClicked(newClicked);
@@ -188,52 +153,42 @@ export default function Home() {
             key={index}
             className="flex flex-col border-2 p-2 rounded-xl border-black m-2"
           >
-            <a className="border-2 min-w-[500px] min-h-96 p-2 rounded-lg">
-              {texts.get(textRender.button.textOnButton) !== ""
-                ? texts.get(textRender.button.textOnButton) ===
+            <div className="border-2 min-w-[500px] min-h-96 p-2 rounded-lg">
+              {texts.get(textRender.button.specification) !== ""
+                ? texts.get(textRender.button.specification) ===
                   "TEXT_GENERATING_"
                   ? "Waiting for text to come back"
-                  : texts.get(textRender.button.textOnButton)
+                  : texts.get(textRender.button.specification)
                 : "Nothing here"}
-            </a>
+            </div>
             <button
               className="p-1 h-10 w-40 border-2 border-black rounded-lg mt-3"
               onClick={async () => {
                 const newClicked = new Map(clicked);
-                newClicked.set(textRender.button.textOnButton, true);
+                newClicked.set(textRender.button.specification, true);
                 setClicked(newClicked);
 
                 setTimeout(() => {
                   const resetClicked = new Map(clicked);
-                  resetClicked.set(textRender.button.textOnButton, false);
+                  resetClicked.set(textRender.button.specification, false);
                   setClicked(resetClicked);
                 }, 300);
 
                 const newT = new Map(texts);
-                newT.set(textRender.button.textOnButton, "TEXT_GENERATING_");
+                newT.set(textRender.button.specification, "TEXT_GENERATING_");
                 setText(newT);
 
-                const newText = await handleClickBaseText(
-                  textRender.button.specification
-                );
-
-                const newTexts = new Map(texts);
-                newTexts.set(textRender.button.textOnButton, newText);
-                setText(newTexts);
-                setTimeout(() => {
-                  const updatedTexts = new Map(texts);
-                  updatedTexts.set(textRender.button.textOnButton, "");
-                  setText(updatedTexts);
-                }, textRender.clearTextTimeMS);
+                await handleClickBaseText(textRender.button.specification, 5); // Run the test 5 times
               }}
             >
-              {clicked.get(textRender.button.textOnButton)
+              {clicked.get(textRender.button.specification)
                 ? "Clicked"
                 : textRender.button.textOnButton}
             </button>
           </div>
         ))}
       </div>
+
       <div className="w-full mt-10 flex flex-grow border-2 p-5 rounded-2xl flex-row justify-between flex-wrap">
         <form onSubmit={handleSubmit}>
           <input type="file" onChange={handleFileChange} ref={fileInputRef} />
@@ -259,3 +214,4 @@ export default function Home() {
     </main>
   );
 }
+
